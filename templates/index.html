@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Stock Price Prediction</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script type="text/javascript">
+        window.onload = function () {
+            let dataPoints = [];
+            let linearPoints = [];
+            let poly2Points = [];
+            let poly3Points = [];
+            let knnPoints = [];
+
+            let p_data = {{ plot_data|tojson|safe }};
+            let l_data = {{ linear_data|tojson|safe }};
+            let p2_data = {{ poly2_data|tojson|safe }};
+            let p3_data = {{ poly3_data|tojson|safe }};
+            let k_data = {{ knn_data|tojson|safe }};
+
+            let plot_data = JSON.parse(p_data);
+            let linear_data = JSON.parse(l_data);
+            let poly2_data = JSON.parse(p2_data);
+            let poly3_data = JSON.parse(p3_data);
+            let knn_data = JSON.parse(k_data);
+
+            for (let pkey in plot_data) {
+                dataPoints.push({
+                    y: plot_data[pkey],
+                    x: parseInt(pkey)
+                })
+            }
+            for (let l_key in linear_data) {
+                linearPoints.push({
+                    y: linear_data[l_key],
+                    x: parseInt(l_key)
+                })
+            }
+            for (let p2_key in poly2_data) {
+                poly2Points.push({
+                    y: poly2_data[p2_key],
+                    x: parseInt(p2_key)
+                })
+            }
+            for (let p3_key in poly3_data) {
+                poly3Points.push({
+                    y: poly3_data[p3_key],
+                    x: parseInt(p3_key)
+                })
+            }
+            for (let k_key in knn_data) {
+                knnPoints.push({
+                    y: knn_data[k_key],
+                    x: parseInt(k_key)
+                })
+            }
+
+            let chart = new CanvasJS.Chart("chartContainer",
+                {
+                    connectNullData: true,
+                    zoomEnabled: true,
+                    title: {
+                        text: "Stock Price Prediction - (" + '{{ comp }}' + ")"
+                    },
+                    axisY2: {
+                        {#title: "Stock Price",#}
+                        prefix: "$",
+                        includeZero: false
+                    },
+                    toolTip: {
+                        shared: true
+                    },
+                    legend: {
+                        cursor: "pointer",
+                        verticalAlign: "top",
+                        horizontalAlign: "center",
+                        dockInsidePlotArea: true,
+                        {#itemclick: toogleDataSeries#}
+                    },
+                    axisX: {
+                        {#title: "Duration",#}
+                    },
+                    data: [{
+                        type: "line",
+                        axisYType: "secondary",
+                        showInLegend: true,
+                        name: "Adj Close",
+                        xValueType: "dateTime",
+                        xValueFormatString: "DD MMMM YYYY",
+                        yValueFormatString: "$###",
+                        dataPoints: dataPoints
+                    }, {
+                        type: "line",
+                        axisYType: "secondary",
+                        showInLegend: true,
+                        markerType: "none",
+                        name: "Linear Prediction",
+                        xValueType: "dateTime",
+                        xValueFormatString: "DD MMMM YYYY",
+                        yValueFormatString: "$###",
+                        dataPoints: linearPoints
+                    }, {
+                        type: "line",
+                        axisYType: "secondary",
+                        showInLegend: true,
+                        markerType: "none",
+                        name: "Poly2 Prediction",
+                        xValueType: "dateTime",
+                        xValueFormatString: "DD MMMM YYYY",
+                        yValueFormatString: "$###",
+                        dataPoints: poly2Points
+                    }, {
+                        type: "line",
+                        axisYType: "secondary",
+                        showInLegend: true,
+                        markerType: "none",
+                        name: "Poly3 Prediction",
+                        xValueType: "dateTime",
+                        xValueFormatString: "DD MMMM YYYY",
+                        yValueFormatString: "$###",
+                        dataPoints: poly3Points
+                    }, {
+                        type: "line",
+                        axisYType: "secondary",
+                        showInLegend: true,
+                        markerType: "none",
+                        name: "KNN Prediction",
+                        xValueType: "dateTime",
+                        xValueFormatString: "DD MMMM YYYY",
+                        yValueFormatString: "$###",
+                        dataPoints: knnPoints
+                    }]
+                });
+            chart.render();
+        };
+    </script>
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<div class="container">
+    <div class="row mt-3 mb-5 h-100 bg-primary pb-3 pt-3">
+        <div class="col-md-4 my-auto">
+            <form class="form-inline">
+                <div class="form-group mx-sm-3">
+                    <input type="text" name="comp" class="form-control" placeholder="eg: AAPL, GOOG">
+                </div>
+                <button type="submit" class="btn btn-light">Predict</button>
+            </form>
+        </div>
+    </div>
+    <div>
+        <div id="chartContainer"></div>
+    </div>
+</div>
+</body>
+</html>
